@@ -1,0 +1,19 @@
+{
+  "name": "proyecto_g3_backend",
+  "version": "1.0.0",
+  "description": "Grupo 3 progra web 2022-2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "grupo 3",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.8.0",
+    "pg-hstore": "^2.3.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  }
+}
