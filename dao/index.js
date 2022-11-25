@@ -29,11 +29,11 @@ const Reporte = sequelize.define("reporte", {
         allowNull : false
     },
     asunto : {
-        type : DataTypes.string(50),
+        type : DataTypes.STRING(50),
         allowNull : false
     },
     descripcion : {
-        type : DataTypes.string(500),
+        type : DataTypes.STRING(500),
         allowNull : false
     }
 }, {
@@ -65,23 +65,23 @@ const Usuario = sequelize.define("usuario", {
     },
     direccion : {
         type : DataTypes.STRING(150),
-        allowNull : false
+        allowNull : true
     },
     departamento : {
-        type : DataTypes.string(30),
-        allowNull : false
+        type : DataTypes.STRING(30),
+        allowNull : true
     },
     ciudad : {
-        type : DataTypes.string(30),
-        allowNull : false
+        type : DataTypes.STRING(30),
+        allowNull : true
     },
     codigo_postal : {
-        type : DataTypes.string(15),
-        allowNull : false
+        type : DataTypes.STRING(15),
+        allowNull : true
     },
     telefono : {
-        type : DataTypes.string(15),
-        allowNull : false
+        type : DataTypes.STRING(15),
+        allowNull : true
     }
 }, {
     timestamps : false,
@@ -107,15 +107,15 @@ const Resena = sequelize.define("resena", {
         allowNull : false
     },
     video_solo_influencer : {
-        type : DataTypes.string(200),
+        type : DataTypes.STRING(200),
         allowNull : true
     },
     link_solo_influencer : {
-        type : DataTypes.string(300),
+        type : DataTypes.STRING(300),
         allowNull : true
     },
     tipo_resena : {
-        type : DataTypes.string(50),
+        type : DataTypes.STRING(50),
         allowNull : false
     }
 }, {

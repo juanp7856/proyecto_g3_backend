@@ -15,15 +15,13 @@ app.use(bodyParser.urlencoded({
 }))
 app.use(cors())
 
-app.get("/register", async (req, res) => {
-    const uuid = uuidv4()
+app.post("/register", async (req, res) => {
     const nombre = req.body.nombre
     const apellido = req.body.apellido
     const correo = req.body.correo
     const password = req.body.password
     
     const nuevoUser = await Usuario.create({
-        id : uuid,
         nombre : nombre,
         apellido : apellido,
         correo: correo,
@@ -37,38 +35,76 @@ app.get("/register", async (req, res) => {
     })
 })
 
-app.get("/login", async (req, res) => {
+app.post("/login", async (req, res) => {
     const correo = req.query.correo
     const password = req.query.password
 
-    const loggedUsuario = await Usuario.findAll({
-        where: {
-            contrasena : password,
-            correo : correo
-        }
-    })
+    try {
+        const loggedUsuario = await Usuario.findOne({
+            where: {
+                contrasena : password,
+                correo : correo
+            }
+        })
 
-    res.send(loggedUsuario)
-    // res.send({
-    //     "id" : loggedUsuario.id,
-    //     "nombre" : loggedUsuario.nombre,
-    //     "apellido" : loggedUsuario.apellido,
-    //     "direccion" : loggedUsuario.direccion,
-    //     "departamento" : loggedUsuario.departamento,
-    //     "ciudad" : loggedUsuario.ciudad,
-    //     "codigo_postal" : loggedUsuario.codigo_postal,
-    //     "telefono" : loggedUsuario.telefono
-    // })
+        res.send({
+            "id" : loggedUsuario.id,
+            "nombre" : loggedUsuario.nombre,
+            "apellido" : loggedUsuario.apellido,
+            "direccion" : loggedUsuario.direccion,
+            "departamento" : loggedUsuario.departamento,
+            "ciudad" : loggedUsuario.ciudad,
+            "codigo_postal" : loggedUsuario.codigo_postal,
+            "telefono" : loggedUsuario.telefono
+        })
+    } catch {
+        res.send("error")
+    }
+    // res.send(loggedUsuario)
+    
 })
 
-app.get("/infoproducto/:id", async (req, res) => {
-    const uuid  = req.params.id
-    const producto = Producto.findAll({
+app.post("/actualizarDatos", async (req, res) => {
+    const uuid = req.body.id
+    const nombre = req.body.nombre
+    const apellido = req.body.apellido
+    const direccion = req.body.direccion
+    const departamento = req.body.departamento
+    const ciudad = req.body.ciudad
+    const codigo_postal = req.body.codigo_postal
+    const telefono = req.body.telefono
+
+    try {
+        await Usuario.update({
+            nombre : nombre,
+            apellido : apellido,
+            direccion : direccion,
+            departamento : departamento,
+            ciudad : ciudad,
+            codigo_postal : codigo_postal,
+            telefono : telefono
+        },
+        {
+            where : {
+                id : uuid
+            }
+        })
+    } catch {
+        res.send("error actualizando datos")
+    }
+})
+
+app.get("/infoproducto", async (req, res) => {
+    const uuid  = req.query.id
+    const producto = Producto.findOne({
         where : {
             id : uuid
         }
     })
-    res.send(producto)
+    res.send({
+        "id" : producto.id
+
+    })
 })
 
 app.get("/productos", async (req, res) => {
@@ -76,51 +112,67 @@ app.get("/productos", async (req, res) => {
     res.send(productos)
 })
 
-app.get("/orden/:id", async (req, res) => {
-    const uuid = req.params.id
-    const ordenProductos = await Orden_Producto.findOne({
+app.get("/ordenProductos", async (req, res) => {
+    const uuid = req.query.id
+    const ordenes = await Orden.findAll({
         where : {
             id : uuid
-        },
-        include : Producto
+        }
+        // ,
+        // include : [{
+        //     model : Orden_Producto,
+        //     include : [{
+        //         model : Producto
+        //     }]
+        // }]
     })
-    res.send(ordenProductos)
+    for (let i = 0; i < ordenes.length; i++) {
+        const ordenesProducto = await Orden_Producto.findAll({
+            where : {
+                orden_id : ordenes[i].id
+            }
+        })
+        for (let j = 0; j < ordenesProducto.length; j++) {
+            const productos = await Producto.findOne({
+                where : {
+                    id : ordenesProducto[j].producto_id
+                }
+            })
+        }
+    }
+    
+
+    
 })
 
-app.get("/orden/generar", async (req, res) => {
-    const uuid = uuidv4()
-    const uuid2 = uuidv4()
+app.post("/orden/generar", async (req, res) => {
     const usuario = req.body.uId
     const monto = req.body.monto
     const direc = req.body.direc
     const productos = req.body.productos
 
-    await Orden.create({
-        id : uuid,
+    const orden = await Orden.create({
         monto : monto,
         usuario_id : usuario,
         direccion : direc,
         fecha : new Date().toJSON(),
     })
 
-    for (let i = 0; i < productos.length; i++) {
+    for (let i = 0; i < productos.length; i++) {  
         await Orden_Producto.create({
-            id : uuid2,
-            orden_id : uuid,
+            orden_id : orden.id,
             producto_id : productos[i].id
         })
     }
 })
 
 app.get("/resena/crear", async (req, res) => {
-    const uuid = uuidv4()
     const usuario = req.body.uId
     const puntaje = req.body.puntaje
     const comentario = req.body.comentario
     const tipo_resena = req.body.tipo_resena
 
     await Resena.create({
-        id : uuid,
         usuario_id : usuario,
         puntaje : puntaje,
         comentario : comentario,
@@ -128,11 +180,13 @@ app.get("/resena/crear", async (req, res) => {
     })
 })
 
+//AÑADIR NOMBRE USUARIO
 app.get("/resenas", async (req, res) => {
     const resenas = await Resena.findAll()
     res.send(resenas)
 })
 
+//CHECAR
 app.get("/build/:id", async (req, res) => {
     const uuid = req.params.id
     const productos = await PC_Armado_Producto.findOne({
@@ -145,5 +199,5 @@ app.get("/build/:id", async (req, res) => {
 })
 
 app.listen(PORT, () => {
-    console.log(`Servidor web iniciado en puerto ${PUERTO}`)
+    console.log(`Servidor web iniciado en puerto ${PORT}`)
 })
