@@ -1,10 +1,8 @@
 const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
-const { v4: uuidv4 } = require('uuid')
 
 const {Orden,Orden_Producto,PC_Armado,PC_Armado_Producto,Producto,Reporte,Resena,Usuario } = require("./dao")
-
 
 const PORT = process.env.PORT || 4444
 
@@ -186,22 +184,24 @@ app.post("/orden/generar", async (req, res) => {
     }
 })
 
-//FALTA REVISAR
+//TERMINADO
 app.post("/resena/crear", async (req, res) => {
     const usuario = req.body.uId
     const puntaje = req.body.puntaje
     const comentario = req.body.comentario
     const tipo_resena = req.body.tipo_resena
 
-    await Resena.create({
+    const nuevaResena = await Resena.create({
         usuario_id : usuario,
         puntaje : puntaje,
         comentario : comentario,
         tipo_resena : tipo_resena
     })
+
+    res.json(nuevaResena)
 })
 
-//FALTA REVISAR
+//TERMINADO
 app.get("/resenas", async (req, res) => {
     const usuarios = await Usuario.findAll()
     
@@ -215,17 +215,38 @@ app.get("/resenas", async (req, res) => {
         })
         listaResenas.push(resenas)
     }
+
+    res.send(listaResenas)
 })
 
-//FALTA TERMINAR
+//TERMINADO
 app.get("/build", async (req, res) => {
-    const uuid = req.params.id
-    const productos = await PC_Armado_Producto.findOne({
+    const uuid = req.query.id
+    
+    const tipo = await PC_Armado.findOne({
         where : {
             id : uuid
         }
     })
-    res.send(productos)
+
+    let listaProductos = []
+
+    const pc_armado = await PC_Armado_Producto.findAll({
+        where : {
+            pcarmado_id : tipo.id
+        }
+    })
+
+    for (let j = 0; j < pc_armado.length; j++) {
+        const producto = await Producto.findOne({
+            where : {
+                id : pc_armado[j].producto_id
+            }
+        })
+        listaProductos.push(producto)
+    }
+    
+    res.json(listaProductos)
 })
 
 //TERMINADO

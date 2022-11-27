@@ -99,7 +99,7 @@ const Resena = sequelize.define("resena", {
         allowNull : false
     },
     puntaje : {
-        type : DataTypes.STRING(20),
+        type : DataTypes.INTEGER,
         allowNull : false
     },
     comentario : {
