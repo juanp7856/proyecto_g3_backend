@@ -15,6 +15,7 @@ app.use(bodyParser.urlencoded({
 }))
 app.use(cors())
 
+//TERMINADO
 app.post("/register", async (req, res) => {
     const nombre = req.body.nombre
     const apellido = req.body.apellido
@@ -35,35 +36,52 @@ app.post("/register", async (req, res) => {
     })
 })
 
+//TERMINADO
 app.post("/login", async (req, res) => {
-    const correo = req.query.correo
-    const password = req.query.password
+    const correo = req.body.correo
+    const contrasena = req.body.contrasena
 
-    try {
-        const loggedUsuario = await Usuario.findOne({
-            where: {
-                contrasena : password,
-                correo : correo
-            }
-        })
+    const loggedUsuario = await Usuario.findOne({
+        where: {
+            correo : correo,
+            contrasena : contrasena
+        }
+    })
 
-        res.send({
-            "id" : loggedUsuario.id,
-            "nombre" : loggedUsuario.nombre,
-            "apellido" : loggedUsuario.apellido,
-            "direccion" : loggedUsuario.direccion,
-            "departamento" : loggedUsuario.departamento,
-            "ciudad" : loggedUsuario.ciudad,
-            "codigo_postal" : loggedUsuario.codigo_postal,
-            "telefono" : loggedUsuario.telefono
-        })
-    } catch {
-        res.send("error")
-    }
-    // res.send(loggedUsuario)
+    res.send({
+        "id" : loggedUsuario.id,
+        "nombre" : loggedUsuario.nombre,
+        "apellido" : loggedUsuario.apellido,
+        "direccion" : loggedUsuario.direccion,
+        "departamento" : loggedUsuario.departamento,
+        "ciudad" : loggedUsuario.ciudad,
+        "codigo_postal" : loggedUsuario.codigo_postal,
+        "telefono" : loggedUsuario.telefono
+    })
     
 })
 
+//TERMINADO
+app.get("/datos", async (req, res) => {
+    const uuid = req.query.id
+    const userdata = await Usuario.findOne({
+        where : {
+            id : uuid
+        }
+    })
+    res.send({
+        "id" : userdata.id,
+        "nombre" : userdata.nombre,
+        "apellido" : userdata.apellido,
+        "direccion" : userdata.direccion,
+        "departamento" : userdata.departamento,
+        "ciudad" : userdata.ciudad,
+        "codigo_postal" : userdata.codigo_postal,
+        "telefono" : userdata.telefono
+    })
+})
+
+//TERMINADO
 app.post("/actualizarDatos", async (req, res) => {
     const uuid = req.body.id
     const nombre = req.body.nombre
@@ -94,38 +112,39 @@ app.post("/actualizarDatos", async (req, res) => {
     }
 })
 
+//TERMINADO
 app.get("/infoproducto", async (req, res) => {
     const uuid  = req.query.id
-    const producto = Producto.findOne({
+    const producto = await Producto.findOne({
         where : {
             id : uuid
         }
     })
     res.send({
-        "id" : producto.id
-
+        "id" : producto.id,
+        "nombre" : producto.nombre,
+        "precio" : producto.precio,
+        "descripcion" : producto.descripcion,
+        "categoria" : producto.categoria
     })
 })
 
+//TERMINADO
 app.get("/productos", async (req, res) => {
     const productos = await Producto.findAll()
     res.send(productos)
 })
 
-app.get("/ordenProductos", async (req, res) => {
+//TERMINADO
+app.get("/orden/productos", async (req, res) => {
     const uuid = req.query.id
     const ordenes = await Orden.findAll({
         where : {
-            id : uuid
+            usuario_id : uuid
         }
-        // ,
-        // include : [{
-        //     model : Orden_Producto,
-        //     include : [{
-        //         model : Producto
-        //     }]
-        // }]
     })
+    let listaProductos = []
+
     for (let i = 0; i < ordenes.length; i++) {
         const ordenesProducto = await Orden_Producto.findAll({
             where : {
@@ -133,18 +152,19 @@ app.get("/ordenProductos", async (req, res) => {
             }
         })
         for (let j = 0; j < ordenesProducto.length; j++) {
-            const productos = await Producto.findOne({
+            const producto = await Producto.findOne({
                 where : {
                     id : ordenesProducto[j].producto_id
                 }
             })
+            listaProductos.push(producto)
         }
     }
-    
+    res.json(listaProductos)
 
-    
 })
 
+//TERMINADO
 app.post("/orden/generar", async (req, res) => {
     const usuario = req.body.uId
     const monto = req.body.monto
@@ -166,7 +186,8 @@ app.post("/orden/generar", async (req, res) => {
     }
 })
 
-app.get("/resena/crear", async (req, res) => {
+//FALTA REVISAR
+app.post("/resena/crear", async (req, res) => {
     const usuario = req.body.uId
     const puntaje = req.body.puntaje
     const comentario = req.body.comentario
@@ -180,22 +201,50 @@ app.get("/resena/crear", async (req, res) => {
     })
 })
 
-//AÑADIR NOMBRE USUARIO
+//FALTA REVISAR
 app.get("/resenas", async (req, res) => {
-    const resenas = await Resena.findAll()
-    res.send(resenas)
+    const usuarios = await Usuario.findAll()
+    
+    let listaResenas = []
+
+    for (let i = 0; i < usuarios.length; i++) {
+        const resenas = await Resena.findAll({
+            where : {
+                usuario_id : usuarios[i].id
+            }
+        })
+        listaResenas.push(resenas)
+    }
 })
 
-//CHECAR
-app.get("/build/:id", async (req, res) => {
+//FALTA TERMINAR
+app.get("/build", async (req, res) => {
     const uuid = req.params.id
     const productos = await PC_Armado_Producto.findOne({
         where : {
             id : uuid
-        },
-        include : Producto
+        }
     })
     res.send(productos)
+})
+
+//TERMINADO
+app.post("/reporte/generar", async (req, res) => {
+    const uuid = req.body.id
+    const correo = req.body.correo
+    const nombre = req.body.nombre
+    const telefono = req.body.telefono
+    const asunto = req.body.asunto
+    const descripcion = req.body.descripcion
+
+    await Reporte.create({
+        correo : correo,
+        nobmre : nombre,
+        telefono : telefono,
+        asunto : asunto,
+        descripcion : descripcion,
+        usuario_id : uuid
+    })
 })
 
 app.listen(PORT, () => {
