@@ -2,7 +2,14 @@ const { Sequelize, DataTypes } = require("sequelize");
 
 const CADENA_CONEXION = process.env.DATABASE_URL
 
-const sequelize = new Sequelize(CADENA_CONEXION)
+const sequelize = new Sequelize(CADENA_CONEXION, {
+    dialectOptions : {
+        ssl : {
+            require : true,
+            rejectUnauthorized : false
+        }
+    }
+})
 
 
 
