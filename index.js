@@ -35,9 +35,9 @@ app.post("/register", async (req, res) => {
 })
 
 //TERMINADO
-app.post("/login", async (req, res) => {
-    const correo = req.body.correo
-    const contrasena = req.body.contrasena
+app.get("/login", async (req, res) => {
+    const correo = req.query.correo
+    const contrasena = req.query.contrasena
 
     const loggedUsuario = await Usuario.findOne({
         where: {
@@ -50,6 +50,7 @@ app.post("/login", async (req, res) => {
         "id" : loggedUsuario.id,
         "nombre" : loggedUsuario.nombre,
         "apellido" : loggedUsuario.apellido,
+        "correo" : loggedUsuario.correo,
         "direccion" : loggedUsuario.direccion,
         "departamento" : loggedUsuario.departamento,
         "ciudad" : loggedUsuario.ciudad,
@@ -60,24 +61,24 @@ app.post("/login", async (req, res) => {
 })
 
 //TERMINADO
-app.get("/datos", async (req, res) => {
-    const uuid = req.query.id
-    const userdata = await Usuario.findOne({
-        where : {
-            id : uuid
-        }
-    })
-    res.send({
-        "id" : userdata.id,
-        "nombre" : userdata.nombre,
-        "apellido" : userdata.apellido,
-        "direccion" : userdata.direccion,
-        "departamento" : userdata.departamento,
-        "ciudad" : userdata.ciudad,
-        "codigo_postal" : userdata.codigo_postal,
-        "telefono" : userdata.telefono
-    })
-})
+// app.get("/datos", async (req, res) => {
+//     const uuid = req.query.id
+//     const userdata = await Usuario.findOne({
+//         where : {
+//             id : uuid
+//         }
+//     })
+//     res.send({
+//         "id" : userdata.id,
+//         "nombre" : userdata.nombre,
+//         "apellido" : userdata.apellido,
+//         "direccion" : userdata.direccion,
+//         "departamento" : userdata.departamento,
+//         "ciudad" : userdata.ciudad,
+//         "codigo_postal" : userdata.codigo_postal,
+//         "telefono" : userdata.telefono
+//     })
+// })
 
 //TERMINADO
 app.post("/actualizarDatos", async (req, res) => {
@@ -90,7 +91,6 @@ app.post("/actualizarDatos", async (req, res) => {
     const codigo_postal = req.body.codigo_postal
     const telefono = req.body.telefono
 
-    try {
         await Usuario.update({
             nombre : nombre,
             apellido : apellido,
@@ -105,9 +105,6 @@ app.post("/actualizarDatos", async (req, res) => {
                 id : uuid
             }
         })
-    } catch {
-        res.send("error actualizando datos")
-    }
 })
 
 //TERMINADO
@@ -133,6 +130,7 @@ app.get("/productos", async (req, res) => {
     res.send(productos)
 })
 
+
 //TERMINADO
 app.get("/orden/productos", async (req, res) => {
     const uuid = req.query.id
@@ -141,24 +139,37 @@ app.get("/orden/productos", async (req, res) => {
             usuario_id : uuid
         }
     })
+
     let listaProductos = []
 
     for (let i = 0; i < ordenes.length; i++) {
+
         const ordenesProducto = await Orden_Producto.findAll({
             where : {
                 orden_id : ordenes[i].id
             }
         })
         for (let j = 0; j < ordenesProducto.length; j++) {
+            // if (ordenesProducto[j].orden_id == ordenes[i].id){
+            //     fechas.push(ordenes[i].fecha)
+            // }
+
             const producto = await Producto.findOne({
                 where : {
                     id : ordenesProducto[j].producto_id
-                }
+                },
+                attributes : ['id','nombre','precio']
             })
-            listaProductos.push(producto)
+            let nProducto = {
+                id : producto.id,
+                nombre : producto.nombre,
+                precio : producto.precio,
+                fecha : ordenes[i].fecha
+            }
+            listaProductos.push(nProducto)
         }
     }
-    res.json(listaProductos)
+    res.send(listaProductos)
 
 })
 
@@ -202,21 +213,34 @@ app.post("/resena/crear", async (req, res) => {
 })
 
 //TERMINADO
-app.get("/resenas", async (req, res) => {
-    const usuarios = await Usuario.findAll()
+app.get("/resenas/usuarios", async (req, res) => {
+    const resenas = await Resena.findAll({
+        where : {
+            tipo_resena : "usuario"
+        },
+        attributes: ['puntaje', 'comentario'],
+        include : {
+            model : Usuario,
+            attributes : ['nombre']
+        }
+    })
     
-    let listaResenas = []
+    res.send(resenas)
+})
 
-    for (let i = 0; i < usuarios.length; i++) {
-        const resenas = await Resena.findAll({
-            where : {
-                usuario_id : usuarios[i].id
-            }
-        })
-        listaResenas.push(resenas)
-    }
-
-    res.send(listaResenas)
+app.get("/resenas/influencers", async (req, res) => {
+    const resenas = await Resena.findAll({
+        where : {
+            tipo_resena : "influencer"
+        },
+        attributes: ['comentario','video_solo_influencer','link_solo_influencer'],
+        include : {
+            model : Usuario,
+            attributes : ['nombre']
+        }
+    })
+    
+    res.send(resenas)
 })
 
 //TERMINADO
@@ -260,7 +284,7 @@ app.post("/reporte/generar", async (req, res) => {
 
     await Reporte.create({
         correo : correo,
-        nobmre : nombre,
+        nombre : nombre,
         telefono : telefono,
         asunto : asunto,
         descripcion : descripcion,
