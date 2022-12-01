@@ -11,7 +11,9 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({
     extended : true
 }))
-app.use(cors())
+app.use(cors({
+    origin : "*"
+}))
 
 app.use(express.static('public')); 
 app.use('/images', express.static('images'));
