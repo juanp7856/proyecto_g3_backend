@@ -162,7 +162,7 @@ app.get("/orden/productos", async (req, res) => {
                 where : {
                     id : ordenesProducto[j].producto_id
                 },
-                attributes : ['id','nombre','precio']
+                attributes : ['id','nombre','precio','imagen']
             })
             let nProducto = {
                 id : producto.id,
