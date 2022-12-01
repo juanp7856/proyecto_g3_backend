@@ -123,7 +123,8 @@ app.get("/infoproducto", async (req, res) => {
         "nombre" : producto.nombre,
         "precio" : producto.precio,
         "descripcion" : producto.descripcion,
-        "categoria" : producto.categoria
+        "categoria" : producto.categoria,
+        "imagen" : producto.imagen
     })
 })
 
@@ -167,6 +168,7 @@ app.get("/orden/productos", async (req, res) => {
                 id : producto.id,
                 nombre : producto.nombre,
                 precio : producto.precio,
+                imagen : producto.imagen,
                 fecha : ordenes[i].fecha
             }
             listaProductos.push(nProducto)

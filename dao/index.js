@@ -197,7 +197,11 @@ const Producto = sequelize.define("producto", {
     categoria : {
         type : DataTypes.STRING(50),
         allowNull : false
-    }
+    },
+    imagen : {
+        type : DataTypes.STRING(150),
+        allowNull : false
+    },
 }, {
     timestamps : false,
     freezeTableName : true
