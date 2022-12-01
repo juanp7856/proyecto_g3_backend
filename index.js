@@ -42,24 +42,28 @@ app.get("/login", async (req, res) => {
     const correo = req.query.correo
     const contrasena = req.query.contrasena
 
-    const loggedUsuario = await Usuario.findOne({
-        where: {
-            correo : correo,
-            contrasena : contrasena
-        }
-    })
+    try{
+        const loggedUsuario = await Usuario.findOne({
+            where: {
+                correo : correo,
+                contrasena : contrasena
+            }
+        })
 
-    res.send({
-        "id" : loggedUsuario.id,
-        "nombre" : loggedUsuario.nombre,
-        "apellido" : loggedUsuario.apellido,
-        "correo" : loggedUsuario.correo,
-        "direccion" : loggedUsuario.direccion,
-        "departamento" : loggedUsuario.departamento,
-        "ciudad" : loggedUsuario.ciudad,
-        "codigo_postal" : loggedUsuario.codigo_postal,
-        "telefono" : loggedUsuario.telefono
-    })
+        res.send({
+            "id" : loggedUsuario.id,
+            "nombre" : loggedUsuario.nombre,
+            "apellido" : loggedUsuario.apellido,
+            "correo" : loggedUsuario.correo,
+            "direccion" : loggedUsuario.direccion,
+            "departamento" : loggedUsuario.departamento,
+            "ciudad" : loggedUsuario.ciudad,
+            "codigo_postal" : loggedUsuario.codigo_postal,
+            "telefono" : loggedUsuario.telefono
+        })
+    } catch {
+        res.send("notfound")
+    }
     
 })
 
@@ -94,20 +98,20 @@ app.post("/actualizarDatos", async (req, res) => {
     const codigo_postal = req.body.codigo_postal
     const telefono = req.body.telefono
 
-        await Usuario.update({
-            nombre : nombre,
-            apellido : apellido,
-            direccion : direccion,
-            departamento : departamento,
-            ciudad : ciudad,
-            codigo_postal : codigo_postal,
-            telefono : telefono
-        },
-        {
-            where : {
-                id : uuid
-            }
-        })
+    await Usuario.update({
+        nombre : nombre,
+        apellido : apellido,
+        direccion : direccion,
+        departamento : departamento,
+        ciudad : ciudad,
+        codigo_postal : codigo_postal,
+        telefono : telefono
+    },
+    {
+        where : {
+            id : uuid
+        }
+    })
 })
 
 //TERMINADO
