@@ -13,6 +13,9 @@ app.use(bodyParser.urlencoded({
 }))
 app.use(cors())
 
+app.use(express.static('public')); 
+app.use('/images', express.static('images'));
+
 //TERMINADO
 app.post("/register", async (req, res) => {
     const nombre = req.body.nombre
